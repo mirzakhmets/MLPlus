@@ -3,7 +3,10 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+
+#if TRIAL
 using Microsoft.Win32;
+#endif
 
 namespace MLPlus
 {
@@ -22,6 +25,7 @@ namespace MLPlus
     private TabPage tabPageMain;
     private TabControl tabControl;
 
+    #if TRIAL
     public void CheckRuns() {
 		try {
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\OVG-Developers", true);
@@ -62,6 +66,7 @@ namespace MLPlus
 		
 		return false;
 	}
+    #endif
     
     public MainForm() {
     	this.InitializeComponent();
@@ -272,9 +277,11 @@ namespace MLPlus
     }
 		void MainFormShown(object sender, EventArgs e)
 		{
+			#if TRIAL
 			if (!IsRegistered()) {
 				CheckRuns();
     		}
+			#endif
 		}
   }
 }
