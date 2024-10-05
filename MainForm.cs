@@ -1,4 +1,6 @@
 ﻿
+#define TRIAL
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -42,7 +44,7 @@ namespace MLPlus
 			
 			key.SetValue("Runs", runs);
 			
-			if (runs > 10) {
+			if (runs > 30) {
 				System.Windows.Forms.MessageBox.Show("Number of runs expired.\n"
 							+ "Please register the application (visit https://ovg-developers.mystrikingly.com/ for purchase).");
 				
