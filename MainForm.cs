@@ -74,6 +74,10 @@ namespace MLPlus
     	this.InitializeComponent();
     }
 
+    public virtual float MLFunction(float x) {
+    	return 1.0f / (x + 1.0f);
+    }
+    
     private void ButtonSearchClick(object sender, EventArgs e)
     {
       string[] strArray1 = this.textBoxQuery.Text.Split(',');
@@ -83,6 +87,13 @@ namespace MLPlus
       float num = (float) this.numericUpDownThreshold.Value / 100f;
       string[] strArray2 = this.richTextBoxData.Text.Split('\n');
       this.richTextBoxResult.Text = "";
+      
+      float[] sum = new float[numArray1.Length];
+		
+      for (int i = 0; i < sum.Length; ++i) {
+      	sum[i] = 0.0f;
+      }
+      
       foreach (string str1 in strArray2)
       {
         char[] chArray = new char[1]{ ',' };
@@ -94,20 +105,37 @@ namespace MLPlus
         for (int index = 1; index < strArray3.Length; ++index)
           numArray2[index - 1] = float.Parse(strArray3[index]);
         bool flag = true;
+        
         for (int index = 0; index < numArray1.Length; ++index)
         {
           if ((double) Math.Abs(numArray1[index] - numArray2[index]) / (double) Math.Max(numArray1[index], numArray2[index]) > (double) num)
           {
             flag = false;
             break;
+          } else {
+          	sum[index] += numArray2[index] * MLFunction(numArray2[index]);
           }
         }
+        
         if (flag)
         {
           RichTextBox richTextBoxResult = this.richTextBoxResult;
-          richTextBoxResult.Text = richTextBoxResult.Text + str2 + "\n";
+          richTextBoxResult.AppendText(str2 + "\n");
+          richTextBoxResult.AppendText("\n");
         }
       }
+      
+      this.richTextBoxResult.AppendText("Prediction:\n");
+      
+      for (int i = 0; i < sum.Length; ++i) {
+      	if (i > 0) {
+      		this.richTextBoxResult.AppendText(" ");
+        }
+        
+      	this.richTextBoxResult.AppendText("" + sum[i]);
+      }
+       
+      this.richTextBoxResult.AppendText("\n");
     }
 
     private void LabelDataClick(object sender, EventArgs e)
