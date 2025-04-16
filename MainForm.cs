@@ -1,10 +1,13 @@
 ﻿
-#define TRIAL
+//#define TRIAL
 
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+
+using System.Collections;
+using System.Collections.Generic;
 
 #if TRIAL
 using Microsoft.Win32;
@@ -74,7 +77,11 @@ namespace MLPlus
     	this.InitializeComponent();
     }
 
-    public virtual float MLFunction(float x) {
+    public virtual float MLTrain(float x) {
+    	return 1.0f / (1.0f + (float) Math.Exp(-x));
+    }
+    
+    public virtual float MLPredict(float x) {
     	return 1.0f / (x + 1.0f);
     }
     
@@ -88,14 +95,23 @@ namespace MLPlus
       string[] strArray2 = this.richTextBoxData.Text.Split('\n');
       this.richTextBoxResult.Text = "";
       
-      float[] sum = new float[numArray1.Length];
-		
-      for (int i = 0; i < sum.Length; ++i) {
-      	sum[i] = 0.0f;
+      float[] sumTrain = new float[numArray1.Length];
+      float[] sumPredict = new float[numArray1.Length];
+	
+      ArrayList results = new ArrayList();
+      
+      for (int i = 0; i < sumTrain.Length; ++i) {
+      	sumTrain[i] = 0.0f;
+      	
+      	sumPredict[i] = 0.0f;
       }
       
       foreach (string str1 in strArray2)
       {
+      	if (str1.Trim().Length == 0) {
+      		continue;
+      	}
+      	
         char[] chArray = new char[1]{ ',' };
         string[] strArray3 = str1.Split(chArray);
         for (int index = 0; index < strArray3.Length; ++index)
@@ -104,38 +120,47 @@ namespace MLPlus
         float[] numArray2 = new float[strArray3.Length - 1];
         for (int index = 1; index < strArray3.Length; ++index)
           numArray2[index - 1] = float.Parse(strArray3[index]);
-        bool flag = true;
+        
+        bool flag = false;
         
         for (int index = 0; index < numArray1.Length; ++index)
         {
           if ((double) Math.Abs(numArray1[index] - numArray2[index]) / (double) Math.Max(numArray1[index], numArray2[index]) > (double) num)
           {
-            flag = false;
-            break;
-          } else {
-          	sum[index] += numArray2[index] * MLFunction(numArray2[index]);
+            sumTrain[index] += numArray2[index] * MLTrain(numArray2[index]);
+            
+            sumPredict[index] += numArray2[index] * MLPredict(numArray2[index]);
+
+            flag = true;
           }
         }
         
-        if (flag)
-        {
-          RichTextBox richTextBoxResult = this.richTextBoxResult;
-          richTextBoxResult.AppendText(str2 + "\n");
-          richTextBoxResult.AppendText("\n");
+        if (flag) {
+        	results.Add(str2);
         }
+      }
+      
+      foreach (object o in results) {
+      	this.richTextBoxResult.AppendText("" + o.ToString() + "\n");
       }
       
       this.richTextBoxResult.AppendText("Prediction:\n");
       
-      for (int i = 0; i < sum.Length; ++i) {
+      for (int i = 0; i < sumPredict.Length; ++i) {
       	if (i > 0) {
       		this.richTextBoxResult.AppendText(" ");
         }
         
-      	this.richTextBoxResult.AppendText("" + sum[i]);
+      	this.richTextBoxResult.AppendText("" + sumPredict[i]);
       }
-       
-      this.richTextBoxResult.AppendText("\n");
+      
+      this.richTextBoxData.AppendText("?");
+      
+      for (int i = 0; i < sumTrain.Length; ++i) {
+      	this.richTextBoxData.AppendText("," + sumTrain[i]);
+      }
+      
+      this.richTextBoxData.AppendText("\n");
     }
 
     private void LabelDataClick(object sender, EventArgs e)
@@ -174,7 +199,7 @@ namespace MLPlus
     	this.tabControl.Controls.Add(this.tabPageMain);
     	this.tabControl.Controls.Add(this.tabPageResult);
     	this.tabControl.Location = new System.Drawing.Point(5, 5);
-    	this.tabControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.tabControl.Margin = new System.Windows.Forms.Padding(4);
     	this.tabControl.Name = "tabControl";
     	this.tabControl.SelectedIndex = 0;
     	this.tabControl.Size = new System.Drawing.Size(603, 398);
@@ -190,9 +215,9 @@ namespace MLPlus
     	this.tabPageMain.Controls.Add(this.textBoxQuery);
     	this.tabPageMain.Controls.Add(this.labelQuery);
     	this.tabPageMain.Location = new System.Drawing.Point(4, 25);
-    	this.tabPageMain.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.tabPageMain.Margin = new System.Windows.Forms.Padding(4);
     	this.tabPageMain.Name = "tabPageMain";
-    	this.tabPageMain.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.tabPageMain.Padding = new System.Windows.Forms.Padding(4);
     	this.tabPageMain.Size = new System.Drawing.Size(595, 369);
     	this.tabPageMain.TabIndex = 0;
     	this.tabPageMain.Text = "Main";
@@ -201,7 +226,7 @@ namespace MLPlus
     	// numericUpDownThreshold
     	// 
     	this.numericUpDownThreshold.Location = new System.Drawing.Point(111, 92);
-    	this.numericUpDownThreshold.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.numericUpDownThreshold.Margin = new System.Windows.Forms.Padding(4);
     	this.numericUpDownThreshold.Name = "numericUpDownThreshold";
     	this.numericUpDownThreshold.Size = new System.Drawing.Size(79, 22);
     	this.numericUpDownThreshold.TabIndex = 6;
@@ -218,7 +243,7 @@ namespace MLPlus
     	// buttonSearch
     	// 
     	this.buttonSearch.Location = new System.Drawing.Point(251, 321);
-    	this.buttonSearch.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.buttonSearch.Margin = new System.Windows.Forms.Padding(4);
     	this.buttonSearch.Name = "buttonSearch";
     	this.buttonSearch.Size = new System.Drawing.Size(100, 28);
     	this.buttonSearch.TabIndex = 4;
@@ -229,11 +254,11 @@ namespace MLPlus
     	// richTextBoxData
     	// 
     	this.richTextBoxData.Location = new System.Drawing.Point(25, 169);
-    	this.richTextBoxData.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.richTextBoxData.Margin = new System.Windows.Forms.Padding(4);
     	this.richTextBoxData.Name = "richTextBoxData";
     	this.richTextBoxData.Size = new System.Drawing.Size(544, 144);
     	this.richTextBoxData.TabIndex = 3;
-    	this.richTextBoxData.Text = "Potato,1.0,2.0\nOnion,3.0,4.0";
+    	this.richTextBoxData.Text = "Potato,1.0,2.0\nOnion,3.0,4.0\n";
     	// 
     	// labelData
     	// 
@@ -248,7 +273,7 @@ namespace MLPlus
     	// textBoxQuery
     	// 
     	this.textBoxQuery.Location = new System.Drawing.Point(25, 49);
-    	this.textBoxQuery.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.textBoxQuery.Margin = new System.Windows.Forms.Padding(4);
     	this.textBoxQuery.Name = "textBoxQuery";
     	this.textBoxQuery.Size = new System.Drawing.Size(544, 22);
     	this.textBoxQuery.TabIndex = 1;
@@ -267,9 +292,9 @@ namespace MLPlus
     	// 
     	this.tabPageResult.Controls.Add(this.richTextBoxResult);
     	this.tabPageResult.Location = new System.Drawing.Point(4, 25);
-    	this.tabPageResult.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.tabPageResult.Margin = new System.Windows.Forms.Padding(4);
     	this.tabPageResult.Name = "tabPageResult";
-    	this.tabPageResult.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.tabPageResult.Padding = new System.Windows.Forms.Padding(4);
     	this.tabPageResult.Size = new System.Drawing.Size(595, 369);
     	this.tabPageResult.TabIndex = 1;
     	this.tabPageResult.Text = "Result";
@@ -278,7 +303,7 @@ namespace MLPlus
     	// richTextBoxResult
     	// 
     	this.richTextBoxResult.Location = new System.Drawing.Point(8, 7);
-    	this.richTextBoxResult.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.richTextBoxResult.Margin = new System.Windows.Forms.Padding(4);
     	this.richTextBoxResult.Name = "richTextBoxResult";
     	this.richTextBoxResult.Size = new System.Drawing.Size(575, 350);
     	this.richTextBoxResult.TabIndex = 0;
@@ -291,7 +316,7 @@ namespace MLPlus
     	this.ClientSize = new System.Drawing.Size(615, 405);
     	this.Controls.Add(this.tabControl);
     	this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-    	this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+    	this.Margin = new System.Windows.Forms.Padding(4);
     	this.MaximizeBox = false;
     	this.MinimizeBox = false;
     	this.Name = "MainForm";
