@@ -1,5 +1,5 @@
 ﻿
-#define TRIAL
+//#define TRIAL
 
 using System;
 using System.ComponentModel;
@@ -337,6 +337,8 @@ namespace MLPlus
 				CheckRuns();
     		}
 			#endif
+			
+			System.Diagnostics.Process.Start("https://baldar.great-site.net");
 		}
   }
 }
