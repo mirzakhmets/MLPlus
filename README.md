@@ -1,2 +1,2 @@
 # MLPlus
- Machine Learning+
+ Machine Learning+ - an application for machine learning
